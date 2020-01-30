@@ -74,11 +74,11 @@ export default {
 </script>
 <style scoped>
 .bigDiv {
-  height: 100vh;
+  /* height: 100vh; */
 }
 .title {
   font-size: 24px;
-  margin-top: 30%;
+  padding-top: 30%;
   text-align: center;
   margin-bottom: 10px;
 }

@@ -1,7 +1,7 @@
 <template>
   <van-pull-refresh v-model="isLoading" success-text="刷新成功" @refresh="onRefresh">
-    <div>
-      <van-list v-model="loading" :finished="finished" finished-text="没有更多了" @load="onLoad">
+    <div class="maxheight">
+      <van-list v-model="loading" :finished="finished" finished-text="好像没有了耶" @load="onLoad">
         <van-card
           tag="鼎利学院"
           :desc="item.describe"
@@ -25,33 +25,52 @@
 export default {
   data() {
     return {
-      count: 0,
-      isLoading: false,//下拉刷新
+      count: 1,
+      isLoading: false, //下拉刷新
       list: [],
       loading: false, //上拉加载状态
       finished: false, //数据全部加载完成
       noReadDetail: "", //这个是未读的数字列表
-      noReadList: "" //这个是list
+      noReadList: "", //这个是list
+      total: ""
     };
   },
 
   methods: {
     onLoad() {
       // 异步更新数据
+      //上拉
       setTimeout(() => {
-        for (let i = 0; i < 10; i++) {
-          this.list.push(this.list.length + 1);
-        }
-        // 加载状态结束
-        this.loading = false;
+        //未读的
+        this.$axios
+          .get("/content/all/page", {
+            params: {
+              detail: this.noReadDetail,
+              page: this.count + 1
+            }
+          })
+          .then(res => {
+            // window.console.log(res.data)
 
-        // 数据全部加载完成
-        if (this.list.length >= 40) {
-          this.finished = true;
-        }
-      }, 500);
+            this.isLoading = false;
+            // 加载状态结束
+            this.loading = false;
+            // 数据全部加载完成
+            if (this.noReadList.length >= this.total) {
+              this.finished = true;
+            }
+            if (res.data[0] == null) {
+              return;
+            }
+            this.count++;
+            this.noReadList = this.noReadList.concat(res.data);
+          });
+      }, 1000);
     },
     onRefresh() {
+      window.console.log("下拉");
+      this.finished = true;
+      this.count = 1;
       this.$axios
         .get("/user/get/one", {
           params: {
@@ -60,17 +79,22 @@ export default {
         })
         .then(res => {
           this.noReadDetail = res.data.noReadDetail;
-
+          this.noReadList = "";
           //未读的
           this.$axios
-            .get("/content/all", {
+            .get("/content/all/page", {
               params: {
-                detail: this.noReadDetail
+                detail: this.noReadDetail,
+                page: 1
               }
             })
             .then(res => {
-              this.noReadList = res.data;
               this.isLoading = false;
+              this.finished = false;
+              if (res.data[0] == null) {
+                return;
+              }
+              this.noReadList = res.data;
             });
         });
     },
@@ -85,6 +109,9 @@ export default {
     }
   },
   created() {
+    if (this.common.id == "") {
+      this.$router.push("/");
+    }
     this.$axios
       .get("/user/get/one", {
         params: {
@@ -93,18 +120,28 @@ export default {
       })
       .then(res => {
         this.noReadDetail = res.data.noReadDetail;
-
         //未读的
         this.$axios
-          .get("/content/all", {
+          .get("/content/all/page", {
             params: {
-              detail: this.noReadDetail
+              detail: this.noReadDetail,
+              page: 1
             }
           })
           .then(res => {
+            window.console.log(res);
+            if (res.data[0] == null) {
+              return;
+            }
             this.noReadList = res.data;
+            this.total = res.data[0].total;
           });
       });
   }
 };
 </script>
+<style scoped>
+.maxheight {
+  min-height: calc(87vh);
+}
+</style>

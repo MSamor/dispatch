@@ -20,7 +20,7 @@
 export default {
   data() {
     return {
-      title:"文章列表",
+      title:"未读列表",
       active: 0,
       back:"",
       vis_show:true

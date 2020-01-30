@@ -32,11 +32,10 @@
           />
         </van-list>
       </van-collapse-item>
-
-        <van-list>
-          <van-button type="danger" class="button" block round @click="outLog">退出登录</van-button>
-        </van-list>
     </van-collapse>
+    <van-list>
+      <van-button type="danger" class="button" block round @click="outLog">退出登录</van-button>
+    </van-list>
   </div>
 </template>
 <script>
@@ -95,6 +94,9 @@ export default {
             }
           })
           .then(res => {
+            if (res.data[0] == null) {
+              return;
+            }
             this.noReadList = res.data;
           });
 
@@ -106,6 +108,9 @@ export default {
             }
           })
           .then(res => {
+            if (res.data[0] == null) {
+              return;
+            }
             this.readList = res.data;
           });
       });
